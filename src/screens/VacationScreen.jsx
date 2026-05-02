@@ -49,6 +49,12 @@ export default function VacationScreen() {
           p_week_start: thisMonday,
         })
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ASSIGNMENTS] })
+        supabase.functions.invoke('send-event-notification', {
+          body: {
+            type: 'reassignment',
+            data: { leaving_flatmate_id: flatmate.id, start_date: startDate, end_date: endDate },
+          },
+        }).catch(() => {})
       }
 
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.VACATION_PERIODS] })

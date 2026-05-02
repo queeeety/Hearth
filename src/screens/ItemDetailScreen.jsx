@@ -8,6 +8,7 @@ import { useLogView } from '../contexts/LogViewContext'
 import { useError } from '../contexts/ErrorContext'
 import { QUERY_KEYS } from '../constants'
 import { formatTimeAgo } from '../lib/utils'
+import { supabase } from '../lib/supabase'
 import Avatar from '../components/ui/Avatar'
 import StatusSelector from '../components/supplies/StatusSelector'
 
@@ -35,6 +36,11 @@ export default function ItemDetailScreen() {
       })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIES] })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIES, id] })
+      if (newStatus === 'out' || newStatus === 'running_low') {
+        supabase.functions.invoke('send-event-notification', {
+          body: { type: newStatus === 'out' ? 'supply_out' : 'supply_low', data: { supply_id: id } },
+        }).catch(() => {})
+      }
     } catch {
       setError('Failed to update status')
     }

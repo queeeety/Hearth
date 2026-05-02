@@ -9,6 +9,7 @@ import { useSuppliesForFlatmate, useSupplies } from '../../hooks/useSupplies'
 import { useFlatmates } from '../../hooks/useFlatmates'
 import { logChore } from '../../lib/chores'
 import { logPurchase } from '../../lib/supplies'
+import { supabase } from '../../lib/supabase'
 import { QUERY_KEYS } from '../../constants'
 import { getThisMonday } from '../../lib/utils'
 import BottomSheet from '../ui/BottomSheet'
@@ -98,6 +99,9 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
         })
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CHORE_LOGS] })
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ASSIGNMENTS] })
+        supabase.functions.invoke('send-event-notification', {
+          body: { type: 'motivation', data: { logged_by_id: doneFlatmateId, week_start: thisMonday } },
+        }).catch(() => {})
       } else {
         await logPurchase({
           supplyId:   selectedSupplyId,

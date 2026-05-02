@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import OneSignal from 'react-onesignal'
 import { supabase } from '../lib/supabase'
 import { useSession } from '../contexts/SessionContext'
 
@@ -8,41 +9,44 @@ export function useNotifications() {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (!window.OneSignal) return
-    window.OneSignal.push(() => {
-      window.OneSignal.isPushNotificationsEnabled(enabled => setIsSubscribed(enabled))
-    })
+    try {
+      setIsSubscribed(OneSignal.User.PushSubscription.optedIn ?? false)
+    } catch {
+      // OneSignal not ready yet
+    }
   }, [])
 
   async function subscribe() {
-    if (!window.OneSignal) return
+    if (!flatmate?.id) return
     setIsLoading(true)
     try {
-      await new Promise(resolve => window.OneSignal.push(resolve))
-      await window.OneSignal.showNativePrompt()
-      const playerId = await window.OneSignal.getUserId()
-      if (playerId && flatmate?.id) {
+      await OneSignal.User.PushSubscription.optIn()
+      OneSignal.User.addTag('flatmate_id', flatmate.id)
+      const subscriptionId = OneSignal.User.PushSubscription.id
+      if (subscriptionId) {
         await supabase.from('push_subscriptions').upsert(
-          { flatmate_id: flatmate.id, onesignal_player_id: playerId },
-          { onConflict: 'flatmate_id' }
+          { flatmate_id: flatmate.id, onesignal_player_id: subscriptionId },
+          { onConflict: 'flatmate_id' },
         )
-        setIsSubscribed(true)
       }
+      setIsSubscribed(true)
+    } catch {
+      // Permission denied or OneSignal unavailable
     } finally {
       setIsLoading(false)
     }
   }
 
   async function unsubscribe() {
-    if (!window.OneSignal) return
     setIsLoading(true)
     try {
-      await new Promise(resolve => window.OneSignal.push(resolve))
-      await window.OneSignal.setSubscription(false)
+      await OneSignal.User.PushSubscription.optOut()
       if (flatmate?.id) {
         await supabase.from('push_subscriptions').delete().eq('flatmate_id', flatmate.id)
       }
       setIsSubscribed(false)
+    } catch {
+      // OneSignal unavailable
     } finally {
       setIsLoading(false)
     }
