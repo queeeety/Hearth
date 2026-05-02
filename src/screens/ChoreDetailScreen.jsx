@@ -85,12 +85,23 @@ export default function ChoreDetailScreen() {
         </p>
         {assignment ? (
           <div className="flex items-center gap-3">
-            <Avatar flatmate={assignment.flatmate} size="md" />
+            <Avatar
+              flatmate={assignment.completed
+                ? (assignment.completed_by_flatmate ?? assignment.flatmate)
+                : assignment.flatmate}
+              size="md"
+            />
             <div className="flex-1 min-w-0">
-              <p className="text-[17px] font-medium text-black">{assignment.flatmate?.name}</p>
+              <p className="text-[17px] font-medium text-black">
+                {assignment.completed
+                  ? (assignment.completed_by_flatmate?.name ?? assignment.flatmate?.name)
+                  : assignment.flatmate?.name}
+              </p>
               <p className="text-[13px] text-[rgba(60,60,67,0.5)]">
                 {assignment.completed
-                  ? `Done ${formatTimeAgo(assignment.completed_at)}`
+                  ? assignment.completed_by !== assignment.flatmate_id
+                    ? `Done for ${assignment.flatmate?.name} · ${formatTimeAgo(assignment.completed_at)}`
+                    : `Done ${formatTimeAgo(assignment.completed_at)}`
                   : 'Assigned this week'}
               </p>
             </div>

@@ -21,10 +21,13 @@ export default function MyWorkScreen() {
   const { data: mySupplies } = useSuppliesForFlatmate(activeFlatmate?.id)
 
   const myAssignments = (allAssignments ?? []).filter(
-    a => a.flatmate_id === activeFlatmate?.id
+    a => a.flatmate_id === activeFlatmate?.id ||
+         (a.completed && a.completed_by === activeFlatmate?.id)
   )
-  const incomplete = myAssignments.filter(a => !a.completed)
-  const done = myAssignments.filter(a => a.completed)
+  const seen = new Set()
+  const myAssignmentsUnique = myAssignments.filter(a => seen.has(a.id) ? false : seen.add(a.id))
+  const incomplete = myAssignmentsUnique.filter(a => !a.completed)
+  const done = myAssignmentsUnique.filter(a => a.completed)
 
   function handleChoreLog(a) {
     openLogView({
@@ -51,7 +54,7 @@ export default function MyWorkScreen() {
           Chores this week
         </p>
 
-        {myAssignments.length === 0 ? (
+        {myAssignmentsUnique.length === 0 ? (
           <div className="mx-4">
             <EmptyState icon="✅" heading="Nothing assigned" body="No chores this week" />
           </div>
@@ -73,18 +76,32 @@ export default function MyWorkScreen() {
                 <Circle size={20} className="text-[rgba(60,60,67,0.2)] flex-shrink-0" />
               </button>
             ))}
-            {done.map(a => (
-              <div
-                key={a.id}
-                className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(60,60,67,0.08)] last:border-0 opacity-50"
-              >
-                <span className="text-2xl w-8 text-center flex-shrink-0">{a.chore?.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[17px] font-medium text-black truncate line-through">{a.chore?.name}</p>
+            {done.map(a => {
+              const didForOther = a.flatmate_id !== activeFlatmate?.id
+              const doneByOther = a.completed_by !== activeFlatmate?.id
+              return (
+                <div
+                  key={a.id}
+                  className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(60,60,67,0.08)] last:border-0 opacity-50"
+                >
+                  <span className="text-2xl w-8 text-center flex-shrink-0">{a.chore?.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[17px] font-medium text-black truncate line-through">{a.chore?.name}</p>
+                    {didForOther && (
+                      <p className="text-[12px] text-[rgba(60,60,67,0.5)] mt-0.5">
+                        Helped {a.flatmate?.name}
+                      </p>
+                    )}
+                    {!didForOther && doneByOther && a.completed_by_flatmate && (
+                      <p className="text-[12px] text-[rgba(60,60,67,0.5)] mt-0.5">
+                        Done by {a.completed_by_flatmate.name}
+                      </p>
+                    )}
+                  </div>
+                  <CheckCircle size={20} className="text-green-primary flex-shrink-0" />
                 </div>
-                <CheckCircle size={20} className="text-green-primary flex-shrink-0" />
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </section>
