@@ -22,6 +22,29 @@ export const SUPPLY_STATUS = {
   OUT:         'out',
 }
 
+// Chore categories
+export const CHORE_CATEGORY = {
+  REGULAR:   'regular',
+  ON_DEMAND: 'on_demand',
+}
+
+// Notification types
+export const NOTIFICATION_TYPE = {
+  MONDAY_REMINDER: 'monday_reminder',
+  CARRY_FORWARD:   'carry_forward',
+  SATURDAY_NUDGE:  'saturday_nudge',
+  MOTIVATION:      'motivation',
+  REASSIGNMENT:    'reassignment',
+  SUPPLY_OUT:      'supply_out',
+  SUPPLY_LOW:      'supply_low',
+  WELCOME_BACK:    'welcome_back',
+}
+
+// UI limits
+export const MAX_NOTE_LENGTH    = 140
+export const RECENT_LOGS_COUNT  = 5
+export const ME_ACTIVITY_COUNT  = 10
+
 // Route paths
 export const ROUTES = {
   HOME:         '/',
