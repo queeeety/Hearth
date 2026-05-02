@@ -9,7 +9,6 @@ export function ensureOneSignalInit(appId) {
     appId,
     allowLocalhostAsSecureOrigin: true,
     notifyButton: { enable: false },
-    serviceWorkerPath: '/Hearth/OneSignalSDKWorker.js',
     serviceWorkerParam: { scope: '/Hearth/' },
   }).then(() => {
     console.log('[OneSignal] init resolved')
