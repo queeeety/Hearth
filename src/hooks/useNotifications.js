@@ -27,6 +27,9 @@ export function useNotifications() {
 
   async function subscribe() {
     console.log('[Notifications] subscribe() called, flatmate:', flatmate?.id)
+    console.log('[Notifications] platform:', navigator.userAgent)
+    console.log('[Notifications] standalone:', window.navigator.standalone)
+    console.log('[Notifications] Notification permission:', typeof Notification !== 'undefined' ? Notification.permission : 'API unavailable')
     if (!flatmate?.id) {
       console.warn('[Notifications] no flatmate id, aborting subscribe')
       return
