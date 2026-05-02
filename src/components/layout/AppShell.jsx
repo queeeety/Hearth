@@ -30,13 +30,10 @@ export default function AppShell({ children }) {
 
   return (
     <LogViewContext.Provider value={{ openLogView }}>
-      <div className="flex flex-col bg-ios-bg min-h-screen">
+      <div className="flex flex-col bg-ios-bg overflow-hidden" style={{ height: '100dvh' }}>
         <OfflineBanner />
-        <PullToRefresh onRefresh={handleRefresh}>
-          <main
-            className="flex-1"
-            style={{ paddingBottom: 'calc(49px + env(safe-area-inset-bottom) + 8px)' }}
-          >
+        <PullToRefresh onRefresh={handleRefresh} className="flex-1 overflow-y-auto">
+          <main className="pb-4">
             {children}
           </main>
         </PullToRefresh>

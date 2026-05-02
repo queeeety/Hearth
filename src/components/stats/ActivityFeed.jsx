@@ -14,7 +14,7 @@ export default function ActivityFeed({ logs }) {
           <Avatar flatmate={log.flatmate} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="text-[15px] text-black truncate">{log.chore?.name}</p>
-            <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{log.flatmate?.name} · {formatTimeAgo(log.logged_at)}</p>
+            <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{log.flatmate?.name} · {formatTimeAgo(log.done_at ?? log.logged_at)}</p>
           </div>
         </div>
       ))}

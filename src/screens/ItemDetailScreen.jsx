@@ -126,7 +126,7 @@ export default function ItemDetailScreen() {
                 <Avatar flatmate={log.flatmate} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[15px] text-black">{log.flatmate?.name}</p>
-                  <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{formatTimeAgo(log.logged_at)}</p>
+                  <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{formatTimeAgo(log.done_at ?? log.logged_at)}</p>
                 </div>
                 {log.note && (
                   <p className="text-[13px] text-[rgba(60,60,67,0.5)] max-w-[120px] truncate">{log.note}</p>

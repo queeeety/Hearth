@@ -90,7 +90,7 @@ export function useSupplyHistory(supplyId, limit = 20) {
         .select('*, flatmate:flatmates(*)')
         .eq('supply_id', supplyId)
         .eq('action', 'bought')
-        .order('logged_at', { ascending: false })
+        .order('done_at', { ascending: false, nullsLast: true })
         .limit(limit)
       if (error) throw error
       return data

@@ -39,6 +39,8 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
   const [timestamp, setTimestamp]         = useState(new Date())
   const [selectedChoreId, setSelectedChoreId]   = useState(null)
   const [selectedSupplyId, setSelectedSupplyId] = useState(null)
+  const [extraChore, setExtraChore]   = useState(null) // chore picked from search (not in assignments)
+  const [extraSupply, setExtraSupply] = useState(null) // supply picked from search (not in mySupplies)
   const [search, setSearch] = useState('')
   const [note, setNote]     = useState('')
   const [isLogging, setIsLogging]     = useState(false)
@@ -51,6 +53,8 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
       setDoneFlatmateId(prefill.doneBy ?? sessionFlatmate?.id)
       setSelectedChoreId(prefill.choreId ?? null)
       setSelectedSupplyId(prefill.supplyId ?? null)
+      setExtraChore(null)
+      setExtraSupply(null)
       setSearch('')
       setNote('')
       setTimestamp(new Date())
@@ -87,13 +91,12 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
     setIsLogging(true)
     try {
       if (type === 'chore') {
-        const assignment = (assignments ?? []).find(
-          a => a.chore_id === selectedChoreId && a.flatmate_id === doneFlatmateId
-        )
+        // Find ANY assignment for this chore this week (not just the logging person's)
+        const assignment = (assignments ?? []).find(a => a.chore_id === selectedChoreId)
         await logChore({
           choreId:    selectedChoreId,
           doneBy:     doneFlatmateId,
-          assignedTo: assignment ? doneFlatmateId : null,
+          assignedTo: assignment?.flatmate_id ?? null,
           note:       note.trim() || null,
           loggedAt:   timestamp.toISOString(),
         })
@@ -107,6 +110,7 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
           supplyId:   selectedSupplyId,
           flatmateId: doneFlatmateId,
           note:       note.trim() || null,
+          doneAt:     timestamp.toISOString(),
         })
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLIES] })
         queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLY_LOGS] })
@@ -124,6 +128,8 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
     setDoneFlatmateId(flatmateId)
     setSelectedChoreId(null)
     setSelectedSupplyId(null)
+    setExtraChore(null)
+    setExtraSupply(null)
   }
 
   return (
@@ -143,6 +149,8 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
             setType(t)
             setSelectedChoreId(null)
             setSelectedSupplyId(null)
+            setExtraChore(null)
+            setExtraSupply(null)
             setSearch('')
           }} />
 
@@ -198,9 +206,10 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
                     {myChoreAssignments.map(a => (
                       <button
                         key={a.chore_id}
-                        onClick={() => setSelectedChoreId(
-                          selectedChoreId === a.chore_id ? null : a.chore_id
-                        )}
+                        onClick={() => {
+                          setSelectedChoreId(selectedChoreId === a.chore_id ? null : a.chore_id)
+                          setExtraChore(null)
+                        }}
                         className="flex items-center gap-3 px-4 py-3 w-full text-left border-b border-[rgba(60,60,67,0.06)] last:border-0 active:opacity-70 transition-opacity"
                       >
                         <span className="text-xl w-7 text-center flex-shrink-0">{a.chore?.icon}</span>
@@ -223,9 +232,10 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
                     {mySupplies.map(s => (
                       <button
                         key={s.id}
-                        onClick={() => setSelectedSupplyId(
-                          selectedSupplyId === s.id ? null : s.id
-                        )}
+                        onClick={() => {
+                          setSelectedSupplyId(selectedSupplyId === s.id ? null : s.id)
+                          setExtraSupply(null)
+                        }}
                         className="flex items-center gap-3 px-4 py-3 w-full text-left border-b border-[rgba(60,60,67,0.06)] last:border-0 active:opacity-70 transition-opacity"
                       >
                         <span className="text-xl w-7 text-center flex-shrink-0">{s.icon}</span>
@@ -240,6 +250,39 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
                 </div>
               )}
             </>
+          )}
+
+          {/* Extra item selected from search */}
+          {type === 'chore' && extraChore && (
+            <div>
+              <p className="text-[13px] text-[rgba(60,60,67,0.5)] font-medium mb-2">Selected</p>
+              <div className="bg-[rgba(116,116,128,0.06)] rounded-ios overflow-hidden">
+                <button
+                  onClick={() => { setSelectedChoreId(null); setExtraChore(null) }}
+                  className="flex items-center gap-3 px-4 py-3 w-full text-left active:opacity-70 transition-opacity"
+                >
+                  <span className="text-xl w-7 text-center flex-shrink-0">{extraChore.icon}</span>
+                  <p className="flex-1 text-[15px] text-black truncate">{extraChore.name}</p>
+                  <Check size={18} className="text-green-primary flex-shrink-0" />
+                </button>
+              </div>
+            </div>
+          )}
+          {type === 'buying' && extraSupply && (
+            <div>
+              <p className="text-[13px] text-[rgba(60,60,67,0.5)] font-medium mb-2">Selected</p>
+              <div className="bg-[rgba(116,116,128,0.06)] rounded-ios overflow-hidden">
+                <button
+                  onClick={() => { setSelectedSupplyId(null); setExtraSupply(null) }}
+                  className="flex items-center gap-3 px-4 py-3 w-full text-left active:opacity-70 transition-opacity"
+                >
+                  <span className="text-xl w-7 text-center flex-shrink-0">{extraSupply.icon}</span>
+                  <p className="flex-1 text-[15px] text-black truncate">{extraSupply.name}</p>
+                  <Badge status={extraSupply.status} />
+                  <Check size={18} className="text-green-primary ml-2 flex-shrink-0" />
+                </button>
+              </div>
+            </div>
           )}
 
           {/* Search */}
@@ -257,28 +300,22 @@ export default function LogView({ isOpen, onClose, prefill = {} }) {
                   ? choreSearchResults.map(c => (
                       <button
                         key={c.id}
-                        onClick={() => { setSelectedChoreId(c.id); setSearch('') }}
+                        onClick={() => { setSelectedChoreId(c.id); setExtraChore(c); setSearch('') }}
                         className="flex items-center gap-3 px-4 py-3 w-full text-left border-b border-[rgba(60,60,67,0.06)] last:border-0 active:opacity-70 transition-opacity"
                       >
                         <span className="text-xl w-7 text-center flex-shrink-0">{c.icon}</span>
                         <p className="flex-1 text-[15px] text-black truncate">{c.name}</p>
-                        {selectedChoreId === c.id && (
-                          <Check size={18} className="text-green-primary flex-shrink-0" />
-                        )}
                       </button>
                     ))
                   : supplySearchResults.map(s => (
                       <button
                         key={s.id}
-                        onClick={() => { setSelectedSupplyId(s.id); setSearch('') }}
+                        onClick={() => { setSelectedSupplyId(s.id); setExtraSupply(s); setSearch('') }}
                         className="flex items-center gap-3 px-4 py-3 w-full text-left border-b border-[rgba(60,60,67,0.06)] last:border-0 active:opacity-70 transition-opacity"
                       >
                         <span className="text-xl w-7 text-center flex-shrink-0">{s.icon}</span>
                         <p className="flex-1 text-[15px] text-black truncate">{s.name}</p>
                         <Badge status={s.status} />
-                        {selectedSupplyId === s.id && (
-                          <Check size={18} className="text-green-primary ml-2 flex-shrink-0" />
-                        )}
                       </button>
                     ))
                 }

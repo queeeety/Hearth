@@ -61,7 +61,7 @@ export function useChoreHistory(choreId, limit = 20) {
         .from('chore_logs')
         .select('*, flatmate:flatmates!done_by(*)')
         .eq('chore_id', choreId)
-        .order('logged_at', { ascending: false })
+        .order('done_at', { ascending: false, nullsLast: true })
         .limit(limit)
       if (error) throw error
       return data
@@ -77,7 +77,7 @@ export function useRecentLogs(limit = 5) {
       const { data, error } = await supabase
         .from('chore_logs')
         .select('*, chore:chores(*), flatmate:flatmates!done_by(*)')
-        .order('logged_at', { ascending: false })
+        .order('done_at', { ascending: false, nullsLast: true })
         .limit(limit)
       if (error) throw error
       return data

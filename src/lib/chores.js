@@ -19,7 +19,7 @@ export async function logChore({ choreId, doneBy, assignedTo, note, loggedAt }) 
     done_by:     doneBy,
     assigned_to: assignedTo ?? null,
     note:        note ?? null,
-    logged_at:   loggedAt,
+    done_at:     loggedAt,
     week_start:  weekStart,
   }).select().single()
 

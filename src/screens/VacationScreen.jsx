@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, parseISO, addDays, subDays, differenceInDays } from 'date-fns'
 import { useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, Trash2 } from 'lucide-react'
+import { ChevronLeft, Trash2, LogIn } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useSession } from '../contexts/SessionContext'
 import { useError } from '../contexts/ErrorContext'
@@ -66,6 +66,16 @@ export default function VacationScreen() {
       setError('Failed to save vacation')
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  async function handleReturnEarly(id) {
+    const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd')
+    try {
+      await supabase.from('vacation_periods').update({ end_date: yesterday }).eq('id', id)
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.VACATION_PERIODS] })
+    } catch {
+      setError('Failed to end vacation')
     }
   }
 
@@ -133,37 +143,77 @@ export default function VacationScreen() {
         </button>
       </div>
 
-      {upcoming && upcoming.length > 0 && (
-        <section className="mx-4 mb-6">
-          <p className="text-[13px] font-semibold uppercase tracking-wide text-[rgba(60,60,67,0.5)] mb-2 px-1">
-            Upcoming
-          </p>
-          <div className="bg-white rounded-ios overflow-hidden">
-            {upcoming.map(v => {
-              const vDays = differenceInDays(parseISO(v.end_date), parseISO(v.start_date)) + 1
-              return (
-                <div
-                  key={v.id}
-                  className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(60,60,67,0.08)] last:border-0"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[15px] text-black">
-                      {format(parseISO(v.start_date), 'd MMM')} – {format(parseISO(v.end_date), 'd MMM')}
-                    </p>
-                    <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{vDays} day{vDays !== 1 ? 's' : ''}</p>
-                  </div>
-                  <button
-                    onClick={() => handleDelete(v.id)}
-                    className="p-2 -mr-1 active:opacity-60 transition-opacity"
-                  >
-                    <Trash2 size={16} className="text-ios-red" />
-                  </button>
+      {(() => {
+        const active = (upcoming ?? []).filter(v => v.start_date <= today && v.end_date >= today)
+        const future = (upcoming ?? []).filter(v => v.start_date > today)
+        return (
+          <>
+            {active.length > 0 && (
+              <section className="mx-4 mb-3">
+                <p className="text-[13px] font-semibold uppercase tracking-wide text-[rgba(60,60,67,0.5)] mb-2 px-1">
+                  Active
+                </p>
+                <div className="bg-white rounded-ios overflow-hidden">
+                  {active.map(v => {
+                    const vDays = differenceInDays(parseISO(v.end_date), parseISO(v.start_date)) + 1
+                    return (
+                      <div
+                        key={v.id}
+                        className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(60,60,67,0.08)] last:border-0"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[15px] text-black">
+                            {format(parseISO(v.start_date), 'd MMM')} – {format(parseISO(v.end_date), 'd MMM')}
+                          </p>
+                          <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{vDays} day{vDays !== 1 ? 's' : ''}</p>
+                        </div>
+                        <button
+                          onClick={() => handleReturnEarly(v.id)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-primary/10 active:opacity-60 transition-opacity"
+                        >
+                          <LogIn size={14} className="text-green-primary" />
+                          <span className="text-[13px] font-medium text-green-primary">Return early</span>
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
-              )
-            })}
-          </div>
-        </section>
-      )}
+              </section>
+            )}
+            {future.length > 0 && (
+              <section className="mx-4 mb-6">
+                <p className="text-[13px] font-semibold uppercase tracking-wide text-[rgba(60,60,67,0.5)] mb-2 px-1">
+                  Upcoming
+                </p>
+                <div className="bg-white rounded-ios overflow-hidden">
+                  {future.map(v => {
+                    const vDays = differenceInDays(parseISO(v.end_date), parseISO(v.start_date)) + 1
+                    return (
+                      <div
+                        key={v.id}
+                        className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(60,60,67,0.08)] last:border-0"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[15px] text-black">
+                            {format(parseISO(v.start_date), 'd MMM')} – {format(parseISO(v.end_date), 'd MMM')}
+                          </p>
+                          <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{vDays} day{vDays !== 1 ? 's' : ''}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDelete(v.id)}
+                          className="p-2 -mr-1 active:opacity-60 transition-opacity"
+                        >
+                          <Trash2 size={16} className="text-ios-red" />
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+          </>
+        )
+      })()}
     </div>
   )
 }

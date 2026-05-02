@@ -73,7 +73,7 @@ export default function MeScreen() {
                       ? item.chore?.name
                       : `Bought ${item.supply?.name}`}
                   </p>
-                  <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{formatTimeAgo(item.logged_at)}</p>
+                  <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{formatTimeAgo(item.done_at ?? item.logged_at)}</p>
                 </div>
               </div>
             ))

@@ -3,7 +3,7 @@ import { RefreshCw } from 'lucide-react'
 
 const THRESHOLD = 72
 
-export default function PullToRefresh({ onRefresh, children }) {
+export default function PullToRefresh({ onRefresh, children, className = '' }) {
   const [pullY, setPullY] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
   const startYRef = useRef(null)
@@ -28,7 +28,7 @@ export default function PullToRefresh({ onRefresh, children }) {
     if (!el) return
 
     function onTouchStart(e) {
-      if (window.scrollY === 0) {
+      if (el.scrollTop === 0) {
         startYRef.current = e.touches[0].clientY
       }
     }
@@ -70,7 +70,7 @@ export default function PullToRefresh({ onRefresh, children }) {
   }, [doRefresh])
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className={className}>
       {(pullY > 0 || refreshing) && (
         <div
           className="flex justify-center items-center overflow-hidden"

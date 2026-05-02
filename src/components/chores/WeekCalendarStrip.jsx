@@ -16,8 +16,9 @@ export default function WeekCalendarStrip({ weekStart, logs = [] }) {
 
   const loggedDays = new Set(
     logs
-      .filter(l => l.logged_at && l.logged_at.slice(0, 10) >= weekStart)
-      .map(l => l.logged_at.slice(0, 10))
+      .map(l => l.done_at ?? l.logged_at)
+      .filter(d => d && d.slice(0, 10) >= weekStart)
+      .map(d => d.slice(0, 10))
   )
 
   return (

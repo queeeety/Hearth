@@ -42,8 +42,8 @@ export default function ChoreDetailScreen() {
 
   const monthStr = format(startOfMonth(new Date()), 'yyyy-MM-dd')
   const yearStr = format(startOfYear(new Date()), 'yyyy-MM-dd')
-  const doneThisMonth = history?.filter(l => l.logged_at >= monthStr).length ?? 0
-  const doneThisYear = history?.filter(l => l.logged_at >= yearStr).length ?? 0
+  const doneThisMonth = history?.filter(l => (l.done_at ?? l.logged_at) >= monthStr).length ?? 0
+  const doneThisYear = history?.filter(l => (l.done_at ?? l.logged_at) >= yearStr).length ?? 0
 
   if (isLoading) {
     return (
@@ -152,7 +152,7 @@ export default function ChoreDetailScreen() {
                 <Avatar flatmate={log.flatmate} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[15px] text-black">{log.flatmate?.name}</p>
-                  <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{formatTimeAgo(log.logged_at)}</p>
+                  <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{formatTimeAgo(log.done_at ?? log.logged_at)}</p>
                 </div>
                 {log.note && (
                   <p className="text-[13px] text-[rgba(60,60,67,0.5)] max-w-[120px] truncate">{log.note}</p>

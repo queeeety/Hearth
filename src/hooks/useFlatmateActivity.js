@@ -8,25 +8,26 @@ export function useFlatmateActivity(flatmateId, limit = 10) {
       const [{ data: choreLogs }, { data: supplyLogs }] = await Promise.all([
         supabase
           .from('chore_logs')
-          .select('id, logged_at, note, chore:chores(name, icon)')
+          .select('id, done_at, logged_at, note, chore:chores(name, icon)')
           .eq('done_by', flatmateId)
-          .order('logged_at', { ascending: false })
+          .order('done_at', { ascending: false, nullsLast: true })
           .limit(limit),
         supabase
           .from('supply_logs')
-          .select('id, logged_at, note, supply:supplies(name, icon)')
+          .select('id, done_at, logged_at, note, supply:supplies(name, icon)')
           .eq('flatmate_id', flatmateId)
           .eq('action', 'bought')
-          .order('logged_at', { ascending: false })
+          .order('done_at', { ascending: false, nullsLast: true })
           .limit(limit),
       ])
 
+      const dateOf = l => l.done_at ?? l.logged_at
       const all = [
         ...(choreLogs ?? []).map(l => ({ ...l, _type: 'chore' })),
         ...(supplyLogs ?? []).map(l => ({ ...l, _type: 'supply' })),
       ]
       return all
-        .sort((a, b) => b.logged_at.localeCompare(a.logged_at))
+        .sort((a, b) => dateOf(b).localeCompare(dateOf(a)))
         .slice(0, limit)
     },
     enabled: !!flatmateId,

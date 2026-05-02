@@ -1,17 +1,19 @@
 import { supabase } from './supabase'
 
-export async function logPurchase({ supplyId, flatmateId, note = null }) {
+export async function logPurchase({ supplyId, flatmateId, note = null, doneAt }) {
+  const timestamp = doneAt ?? new Date().toISOString()
   await supabase.from('supply_logs').insert({
     supply_id:   supplyId,
     flatmate_id: flatmateId,
     action:      'bought',
     new_status:  'stocked',
     note,
+    done_at:     timestamp,
   })
   await supabase.from('supplies').update({
-    status:        'stocked',
+    status:         'stocked',
     last_bought_by: flatmateId,
-    last_bought_at: new Date().toISOString(),
+    last_bought_at: timestamp,
   }).eq('id', supplyId)
   await supabase.rpc('increment_purchase_count', {
     p_supply_id:   supplyId,
