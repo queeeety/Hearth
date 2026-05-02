@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react'
 import { getSession, saveSession, clearSession } from '../lib/auth'
-import EircodeScreen from '../screens/EircodeScreen'
-import FlatmateSelectScreen from '../screens/FlatmateSelectScreen'
+import EircodeScreen from '../screens/auth/EircodeScreen'
+import FlatmateSelectScreen from '../screens/auth/FlatmateSelectScreen'
 
 const SessionContext = createContext(null)
 

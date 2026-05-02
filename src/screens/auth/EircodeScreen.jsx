@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { hashInput } from '../lib/auth'
+import { hashInput } from '../../lib/auth'
 
 export default function EircodeScreen({ onSuccess }) {
   const [value, setValue] = useState('')

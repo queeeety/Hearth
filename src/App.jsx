@@ -1,24 +1,56 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
-import { SessionProvider, useSession } from './contexts/SessionContext'
+import OneSignal from 'react-onesignal'
+import { SessionProvider } from './contexts/SessionContext'
+import { ErrorProvider } from './contexts/ErrorContext'
+import AppShell from './components/layout/AppShell'
 import { ensureWeeklyAssignments } from './lib/chores'
 
-const queryClient = new QueryClient()
+import HomeScreen        from './screens/HomeScreen'
+import AllChoresScreen   from './screens/AllChoresScreen'
+import ChoreDetailScreen from './screens/ChoreDetailScreen'
+import AllBuyingsScreen  from './screens/AllBuyingsScreen'
+import ItemDetailScreen  from './screens/ItemDetailScreen'
+import MyWorkScreen      from './screens/MyWorkScreen'
+import MeScreen          from './screens/MeScreen'
+import VacationScreen    from './screens/VacationScreen'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      refetchOnWindowFocus: true,
+    },
+  },
+})
 
 function MainApp() {
-  const { flatmate } = useSession()
-
   useEffect(() => {
     ensureWeeklyAssignments()
   }, [])
 
+  useEffect(() => {
+    OneSignal.init({
+      appId: import.meta.env.VITE_ONESIGNAL_APP_ID,
+      serviceWorkerPath: '/Hearth/OneSignalSDKWorker.js',
+      allowLocalhostAsSecureOrigin: true,
+    }).catch(() => {})
+  }, [])
+
   return (
-    <div className="min-h-screen bg-ios-bg font-sans flex items-center justify-center">
-      <p className="text-[17px] text-[rgba(60,60,67,0.6)]">
-        Welcome, {flatmate?.name} 👋
-      </p>
-    </div>
+    <AppShell>
+      <Routes>
+        <Route path="/"            element={<HomeScreen />} />
+        <Route path="/chores"      element={<AllChoresScreen />} />
+        <Route path="/chores/:id"  element={<ChoreDetailScreen />} />
+        <Route path="/buyings"     element={<AllBuyingsScreen />} />
+        <Route path="/buyings/:id" element={<ItemDetailScreen />} />
+        <Route path="/my-work"     element={<MyWorkScreen />} />
+        <Route path="/me"          element={<MeScreen />} />
+        <Route path="/me/vacation" element={<VacationScreen />} />
+      </Routes>
+    </AppShell>
   )
 }
 
@@ -27,7 +59,9 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter basename="/Hearth">
         <SessionProvider>
-          <MainApp />
+          <ErrorProvider>
+            <MainApp />
+          </ErrorProvider>
         </SessionProvider>
       </BrowserRouter>
     </QueryClientProvider>

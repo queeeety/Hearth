@@ -19,8 +19,8 @@ This section is for **Tim to complete manually** before handing the plan to an A
 4. Copy your GitHub username and repo URL.
 
 > Fill in when done:
-> - `[[GITHUB_USERNAME]]` — your GitHub username (e.g. `timm`)
-> - `[[GITHUB_REPO_URL]]` — full repo URL (e.g. `https://github.com/timm/hearth`)
+> - `queeeety` — your GitHub username
+> - `https://github.com/queeeety/Hearth` — full repo URL 
 
 ---
 
@@ -32,9 +32,9 @@ This section is for **Tim to complete manually** before handing the plan to an A
 4. Copy the **Project URL**, the **anon/public** key, and the **service_role** key (needed for pg_cron scheduled jobs — keep this secret).
 
 > Fill in when done:
-> - `[[SUPABASE_URL]]` — e.g. `https://abcdefgh.supabase.co`
-> - `[[SUPABASE_ANON_KEY]]` — the long `eyJ...` string under "anon public"
-> - `[[SERVICE_ROLE_KEY]]` — the long `eyJ...` string under "service_role" (**never expose this in frontend code or git**)
+> - `https://etnujqbquvlsyvrqpssr.supabase.co` — e.g. `https://abcdefgh.supabase.co`
+> - `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0bnVqcWJxdXZsc3l2cnFwc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NjcxNTYsImV4cCI6MjA5MzI0MzE1Nn0.brKdDxOM_oLqpF3l9vXM-WcYOLDG_aCHlXyWQLjLaeQ` — the long `eyJ...` string under "anon public"
+> - `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0bnVqcWJxdXZsc3l2cnFwc3NyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzY2NzE1NiwiZXhwIjoyMDkzMjQzMTU2fQ.cSDSGvFvf9bilMtFxESul2O_W4sT6JInZzzYmqfidls` — the long `eyJ...` string under "service_role" (**never expose this in frontend code or git**)
 
 ---
 
@@ -52,7 +52,7 @@ console.log(Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0'))
 3. Copy the output (a 64-character hex string).
 
 > Fill in when done:
-> - `[[EIRCODE_HASH]]` — the 64-character hash string (not your actual Eircode)
+> - `70eb5ba01fa7b48d9864e9c779ff6d705a45e30c0eb285b7877e76482f1bab71` — the 64-character hash string (not your actual Eircode)
 
 ---
 
@@ -67,8 +67,8 @@ console.log(Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0'))
 7. Download the `OneSignalSDKWorker.js` file from the setup page — you'll place this in the project's `public/` folder.
 
 > Fill in when done:
-> - `[[ONESIGNAL_APP_ID]]` — the App ID GUID
-> - `[[ONESIGNAL_REST_KEY]]` — the REST API Key
+> - `9b5e196a-dd1e-41d3-86a7-20a29f2d2914` — the App ID GUID
+> - `os_v2_app_tnpbs2w5dza5hbvhecrj6ljjcrx7mwezlnmu4y4vwqpm4xs57hncwv5ozkqglv3slt7wutzytjj2nbx43ikyairljbjy5qmbicokh2a` — the REST API Key
 
 ---
 
@@ -77,9 +77,9 @@ console.log(Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0'))
 The database seeds 3 flatmates. Replace the placeholders with real names.
 
 > Fill in:
-> - `[[FLATMATE_1_NAME]]` — e.g. `Tim`
-> - `[[FLATMATE_2_NAME]]` — e.g. `Elaine`
-> - `[[FLATMATE_3_NAME]]` — e.g. `Suhail`
+> - `Tim` — e.g. `Tim`
+> - `Elaine` — e.g. `Elaine`
+> - `Suhail` — e.g. `Suhail`
 
 ---
 
@@ -94,6 +94,7 @@ Once the GitHub repo is created and all values above are collected:
 |-------------|-------|
 | `VITE_SUPABASE_URL` | `[[SUPABASE_URL]]` |
 | `VITE_SUPABASE_ANON_KEY` | `[[SUPABASE_ANON_KEY]]` |
+| `VITE_SUPABASE_SERVICE_ROLE` | `[[VITE_SUPABASE_SERVICE_ROLE]]` |
 | `VITE_EIRCODE` | `[[EIRCODE_HASH]]` |
 | `VITE_ONESIGNAL_APP_ID` | `[[ONESIGNAL_APP_ID]]` |
 | `ONESIGNAL_REST_KEY` | `[[ONESIGNAL_REST_KEY]]` |
