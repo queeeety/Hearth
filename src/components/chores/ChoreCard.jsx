@@ -1,8 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import Avatar from '../ui/Avatar'
 
-// Full implementation in Step 8
-export default function ChoreCard({ assignment, chore, onClick }) {
+export default function ChoreCard({ assignment, chore, label, onClick }) {
   const c = chore ?? assignment?.chore
   const flatmate = assignment?.flatmate
   if (!c) return null
@@ -14,6 +13,9 @@ export default function ChoreCard({ assignment, chore, onClick }) {
       <span className="text-2xl w-8 text-center flex-shrink-0">{c.icon}</span>
       <div className="flex-1 min-w-0">
         <p className="text-[17px] font-medium text-black truncate">{c.name}</p>
+        {label && (
+          <p className="text-[13px] text-[rgba(60,60,67,0.5)] truncate mt-0.5">{label}</p>
+        )}
       </div>
       {flatmate && <Avatar flatmate={flatmate} size="sm" />}
       <ChevronRight size={16} className="text-[rgba(60,60,67,0.3)] flex-shrink-0" />

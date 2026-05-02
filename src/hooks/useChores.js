@@ -101,3 +101,21 @@ export function useMissedAssignments(lastWeekStart) {
     enabled: !!lastWeekStart,
   })
 }
+
+export function useVacationPeriods(flatmateId) {
+  return useQuery({
+    queryKey: [QUERY_KEYS.VACATION_PERIODS, flatmateId],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10)
+      const { data, error } = await supabase
+        .from('vacation_periods')
+        .select('*')
+        .eq('flatmate_id', flatmateId)
+        .gte('end_date', today)
+        .order('start_date')
+      if (error) throw error
+      return data
+    },
+    enabled: !!flatmateId,
+  })
+}

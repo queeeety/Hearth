@@ -52,6 +52,35 @@ export function useNextBuyer(supplyId) {
   })
 }
 
+export function useSuppliesForFlatmate(flatmateId) {
+  return useQuery({
+    queryKey: [QUERY_KEYS.NEXT_BUYER, 'for', flatmateId],
+    queryFn: async () => {
+      const [{ data: supplies }, { data: counts }] = await Promise.all([
+        supabase
+          .from('supplies')
+          .select('*, last_buyer:flatmates!last_bought_by(*)')
+          .eq('active', true)
+          .order('name'),
+        supabase
+          .from('supply_purchase_counts')
+          .select('supply_id, flatmate_id, purchase_count, last_purchased_at')
+          .order('purchase_count', { ascending: true })
+          .order('last_purchased_at', { ascending: true, nullsFirst: true }),
+      ])
+
+      const nextForSupply = new Map()
+      for (const row of (counts ?? [])) {
+        if (!nextForSupply.has(row.supply_id)) {
+          nextForSupply.set(row.supply_id, row.flatmate_id)
+        }
+      }
+      return (supplies ?? []).filter(s => nextForSupply.get(s.id) === flatmateId)
+    },
+    enabled: !!flatmateId,
+  })
+}
+
 export function useSupplyHistory(supplyId, limit = 20) {
   return useQuery({
     queryKey: [QUERY_KEYS.SUPPLY_LOGS, supplyId],

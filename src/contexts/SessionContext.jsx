@@ -20,7 +20,13 @@ export function SessionProvider({ children }) {
     setGateScreen('eircode')
   }
 
-  const value = { flatmate, setFlatmate, isAuthenticated: flatmate !== null, logout }
+  function switchProfile() {
+    clearSession()
+    setFlatmateState(null)
+    setGateScreen('flatmate_select')
+  }
+
+  const value = { flatmate, setFlatmate, isAuthenticated: flatmate !== null, logout, switchProfile }
 
   if (!flatmate) {
     return (

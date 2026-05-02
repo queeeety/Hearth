@@ -1,13 +1,11 @@
 import { useFlatmates } from '../../hooks/useFlatmates'
-import { useSession } from '../../contexts/SessionContext'
 
 export default function FlatmateSwitcher({ activeFlatmateId, onSwitch }) {
   const { data: flatmates } = useFlatmates()
-  const { setFlatmate } = useSession()
 
   function handleSwitch(f) {
+    if (f.id === activeFlatmateId) return
     if (navigator.vibrate) navigator.vibrate(10)
-    setFlatmate(f)
     onSwitch?.(f)
   }
 
