@@ -27,7 +27,17 @@ export default {
       },
       boxShadow: {
         'ios': '0 1px 0 0 rgba(60,60,67,0.12)',
-      }
+      },
+      animation: {
+        'shake': 'shake 0.4s ease-in-out',
+      },
+      keyframes: {
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '20%, 60%': { transform: 'translateX(-8px)' },
+          '40%, 80%': { transform: 'translateX(8px)' },
+        },
+      },
     }
   },
   plugins: [],
