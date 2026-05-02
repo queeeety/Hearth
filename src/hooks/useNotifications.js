@@ -14,9 +14,11 @@ export function useNotifications() {
     getOneSignalInitPromise().then(() => {
       if (cancelled) return
       try {
-        setIsSubscribed(OneSignal.User.PushSubscription.optedIn ?? false)
-      } catch {
-        // OneSignal unavailable (e.g. localhost without HTTPS)
+        const optedIn = OneSignal.User.PushSubscription.optedIn ?? false
+        console.log('[Notifications] init done, optedIn:', optedIn)
+        setIsSubscribed(optedIn)
+      } catch (err) {
+        console.warn('[Notifications] could not read optedIn after init:', err)
       }
       setIsLoading(false)
     })
@@ -24,36 +26,52 @@ export function useNotifications() {
   }, [])
 
   async function subscribe() {
-    if (!flatmate?.id) return
+    console.log('[Notifications] subscribe() called, flatmate:', flatmate?.id)
+    if (!flatmate?.id) {
+      console.warn('[Notifications] no flatmate id, aborting subscribe')
+      return
+    }
     setIsLoading(true)
     try {
+      console.log('[Notifications] calling optIn()...')
       await OneSignal.User.PushSubscription.optIn()
+      console.log('[Notifications] optIn resolved')
+
       OneSignal.User.addTag('flatmate_id', flatmate.id)
+
       const subscriptionId = OneSignal.User.PushSubscription.id
+      console.log('[Notifications] subscriptionId:', subscriptionId)
+
       if (subscriptionId) {
-        await supabase.from('push_subscriptions').upsert(
+        const { error } = await supabase.from('push_subscriptions').upsert(
           { flatmate_id: flatmate.id, onesignal_player_id: subscriptionId },
           { onConflict: 'flatmate_id' },
         )
+        if (error) console.error('[Notifications] supabase upsert error:', error)
+        else console.log('[Notifications] supabase upsert ok')
+      } else {
+        console.warn('[Notifications] no subscriptionId after optIn')
       }
       setIsSubscribed(true)
-    } catch {
-      // Permission denied or OneSignal unavailable
+    } catch (err) {
+      console.error('[Notifications] subscribe error:', err)
     } finally {
       setIsLoading(false)
     }
   }
 
   async function unsubscribe() {
+    console.log('[Notifications] unsubscribe() called')
     setIsLoading(true)
     try {
       await OneSignal.User.PushSubscription.optOut()
+      console.log('[Notifications] optOut resolved')
       if (flatmate?.id) {
         await supabase.from('push_subscriptions').delete().eq('flatmate_id', flatmate.id)
       }
       setIsSubscribed(false)
-    } catch {
-      // OneSignal unavailable
+    } catch (err) {
+      console.error('[Notifications] unsubscribe error:', err)
     } finally {
       setIsLoading(false)
     }
