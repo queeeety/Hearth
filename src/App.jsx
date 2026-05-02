@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useEffect } from 'react'
-import OneSignal from 'react-onesignal'
+import { ensureOneSignalInit } from './lib/onesignal'
 import { SessionProvider } from './contexts/SessionContext'
 import { ErrorProvider } from './contexts/ErrorContext'
 import AppShell from './components/layout/AppShell'
@@ -31,11 +31,7 @@ function MainApp() {
   }, [])
 
   useEffect(() => {
-    OneSignal.init({
-      appId: import.meta.env.VITE_ONESIGNAL_APP_ID,
-      serviceWorkerPath: '/Hearth/OneSignalSDKWorker.js',
-      allowLocalhostAsSecureOrigin: true,
-    }).catch(() => {})
+    ensureOneSignalInit(import.meta.env.VITE_ONESIGNAL_APP_ID)
   }, [])
 
   return (

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { format, parseISO, addDays, differenceInDays } from 'date-fns'
+import { format, parseISO, addDays, subDays, differenceInDays } from 'date-fns'
 import { useQueryClient } from '@tanstack/react-query'
 import { ChevronLeft, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -17,6 +17,7 @@ export default function VacationScreen() {
   const queryClient = useQueryClient()
   const today = format(new Date(), 'yyyy-MM-dd')
 
+  const pastLimit = format(subDays(new Date(), 60), 'yyyy-MM-dd')
   const [startDate, setStartDate] = useState(today)
   const [endDate, setEndDate] = useState(format(addDays(new Date(), 3), 'yyyy-MM-dd'))
   const [isSaving, setIsSaving] = useState(false)
@@ -43,7 +44,8 @@ export default function VacationScreen() {
       if (error) throw error
 
       const thisMonday = getThisMonday()
-      if (startDate <= thisMonday && endDate >= thisMonday) {
+      const weekEnd = format(addDays(parseISO(thisMonday), 6), 'yyyy-MM-dd')
+      if (startDate <= weekEnd && endDate >= thisMonday) {
         await supabase.rpc('reassign_vacation_chores', {
           p_flatmate_id: flatmate.id,
           p_week_start: thisMonday,
@@ -103,7 +105,7 @@ export default function VacationScreen() {
             <input
               type="date"
               value={startDate}
-              min={today}
+              min={pastLimit}
               onChange={e => setStartDate(e.target.value)}
               className="w-full bg-[rgba(116,116,128,0.08)] rounded-ios-sm px-3 py-2.5 text-[15px] text-black outline-none"
             />

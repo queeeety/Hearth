@@ -2,18 +2,25 @@ import { useState, useEffect } from 'react'
 import OneSignal from 'react-onesignal'
 import { supabase } from '../lib/supabase'
 import { useSession } from '../contexts/SessionContext'
+import { getOneSignalInitPromise } from '../lib/onesignal'
 
 export function useNotifications() {
   const { flatmate } = useSession()
   const [isSubscribed, setIsSubscribed] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    try {
-      setIsSubscribed(OneSignal.User.PushSubscription.optedIn ?? false)
-    } catch {
-      // OneSignal not ready yet
-    }
+    let cancelled = false
+    getOneSignalInitPromise().then(() => {
+      if (cancelled) return
+      try {
+        setIsSubscribed(OneSignal.User.PushSubscription.optedIn ?? false)
+      } catch {
+        // OneSignal unavailable (e.g. localhost without HTTPS)
+      }
+      setIsLoading(false)
+    })
+    return () => { cancelled = true }
   }, [])
 
   async function subscribe() {
