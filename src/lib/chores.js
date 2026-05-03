@@ -1,7 +1,7 @@
 import { format, startOfWeek } from 'date-fns'
 import { supabase } from './supabase'
 import { ASSIGNMENTS_STORAGE_KEY_PREFIX } from '../constants'
-import { getWeekStart } from './utils'
+import { getWeekStart, getThisMonday } from './utils'
 
 export async function ensureWeeklyAssignments() {
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd')
@@ -34,7 +34,7 @@ export async function logChore({ choreId, doneBy, assignedTo, note, loggedAt }) 
         completed_at: loggedAt,
       })
       .eq('chore_id', choreId)
-      .eq('week_start', weekStart)
+      .eq('week_start', getThisMonday())
       .eq('completed', false)
   }
 
