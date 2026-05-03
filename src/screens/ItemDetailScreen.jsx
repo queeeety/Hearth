@@ -74,6 +74,11 @@ export default function ItemDetailScreen() {
             {supply.name}
           </h1>
         </div>
+        {supply.description && (
+          <p className="text-[15px] text-[rgba(60,60,67,0.6)] leading-relaxed mt-4">
+            {supply.description}
+          </p>
+        )}
       </div>
 
       <div className="mx-4 bg-white rounded-ios p-4 mb-3">
