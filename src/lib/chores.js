@@ -31,7 +31,7 @@ export async function logChore({ choreId, doneBy, assignedTo, note, loggedAt }) 
       .update({
         completed:    true,
         completed_by: doneBy,
-        completed_at: new Date().toISOString(),
+        completed_at: loggedAt,
       })
       .eq('chore_id', choreId)
       .eq('week_start', weekStart)
