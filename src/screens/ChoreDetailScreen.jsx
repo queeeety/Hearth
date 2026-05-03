@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { format, startOfMonth, startOfYear } from 'date-fns'
 import { ChevronLeft } from 'lucide-react'
-import { useChore, useChoreHistory, useAssignments } from '../hooks/useChores'
+import { useChore, useChoreHistory, useAssignments, useOnDemandNextUp } from '../hooks/useChores'
 import { getThisMonday, formatTimeAgo } from '../lib/utils'
 import { useLogView } from '../contexts/LogViewContext'
 import Avatar from '../components/ui/Avatar'
@@ -37,6 +37,7 @@ export default function ChoreDetailScreen() {
   const { data: chore, isLoading } = useChore(id)
   const { data: history } = useChoreHistory(id, 20)
   const { data: assignments } = useAssignments(thisMonday)
+  const { data: nextUp } = useOnDemandNextUp(id, chore?.category === 'on_demand')
 
   const assignment = assignments?.find(a => a.chore_id === id)
 
@@ -81,9 +82,25 @@ export default function ChoreDetailScreen() {
 
       <div className="mx-4 bg-white rounded-ios p-4 mb-3">
         <p className="text-[13px] font-semibold uppercase tracking-wide text-[rgba(60,60,67,0.5)] mb-3">
-          This week
+          {chore.category === 'on_demand' ? 'Up next' : 'This week'}
         </p>
-        {assignment ? (
+        {chore.category === 'on_demand' ? (
+          nextUp ? (
+            <div className="flex items-center gap-3">
+              <Avatar flatmate={nextUp} size="md" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[17px] font-medium text-black">{nextUp.name}</p>
+                {chore.skip_if_away_days && (
+                  <p className="text-[13px] text-[rgba(60,60,67,0.5)]">
+                    Turn skipped if away ≥ {chore.skip_if_away_days} days
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-[15px] text-[rgba(60,60,67,0.5)]">No history yet</p>
+          )
+        ) : assignment ? (
           <div className="flex items-center gap-3">
             <Avatar
               flatmate={assignment.completed
@@ -160,13 +177,25 @@ export default function ChoreDetailScreen() {
                 key={log.id}
                 className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(60,60,67,0.08)] last:border-0"
               >
-                <Avatar flatmate={log.flatmate} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[15px] text-black">{log.flatmate?.name}</p>
-                  <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{formatTimeAgo(log.done_at ?? log.logged_at)}</p>
-                </div>
-                {log.note && (
-                  <p className="text-[13px] text-[rgba(60,60,67,0.5)] max-w-[120px] truncate">{log.note}</p>
+                {log.is_vacation_skip ? (
+                  <>
+                    <span className="text-xl w-7 text-center flex-shrink-0 opacity-40">🏖️</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] text-[rgba(60,60,67,0.5)]">{log.flatmate?.name}</p>
+                      <p className="text-[13px] text-[rgba(60,60,67,0.4)]">Turn skipped · away</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Avatar flatmate={log.flatmate} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[15px] text-black">{log.flatmate?.name}</p>
+                      <p className="text-[13px] text-[rgba(60,60,67,0.5)]">{formatTimeAgo(log.done_at ?? log.logged_at)}</p>
+                    </div>
+                    {log.note && (
+                      <p className="text-[13px] text-[rgba(60,60,67,0.5)] max-w-[120px] truncate">{log.note}</p>
+                    )}
+                  </>
                 )}
               </div>
             ))}

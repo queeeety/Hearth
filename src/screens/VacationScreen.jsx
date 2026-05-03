@@ -59,6 +59,13 @@ export default function VacationScreen() {
         }).catch(() => {})
       }
 
+      // Create rotation skips for on-demand chores where vacation meets threshold
+      await supabase.rpc('create_on_demand_vacation_skips', {
+        p_flatmate_id:    flatmate.id,
+        p_vacation_start: startDate,
+        p_vacation_end:   endDate,
+      })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CHORE_LOGS] })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.VACATION_PERIODS] })
       setStartDate(today)
       setEndDate(format(addDays(new Date(), 3), 'yyyy-MM-dd'))

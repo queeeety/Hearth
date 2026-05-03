@@ -102,6 +102,55 @@ export function useMissedAssignments(lastWeekStart) {
   })
 }
 
+// Returns the flatmate who should do the on-demand chore next.
+// Counts all logs (including vacation skips) so skips correctly
+// shift a person down the rotation.
+export function useOnDemandNextUp(choreId, isOnDemand) {
+  return useQuery({
+    queryKey: [QUERY_KEYS.CHORE_LOGS, choreId, 'next_up'],
+    queryFn: async () => {
+      const [{ data: logs }, { data: flatmates }] = await Promise.all([
+        supabase
+          .from('chore_logs')
+          .select('done_by, done_at, logged_at')
+          .eq('chore_id', choreId)
+          .order('done_at', { ascending: false, nullsLast: true }),
+        supabase
+          .from('flatmates')
+          .select('*')
+          .eq('active', true)
+          .order('created_at'),
+      ])
+
+      if (!flatmates?.length) return null
+      if (!logs?.length) return flatmates[0]
+
+      const counts  = Object.fromEntries(flatmates.map(f => [f.id, 0]))
+      const lastAt  = Object.fromEntries(flatmates.map(f => [f.id, null]))
+
+      for (const l of logs) {
+        if (l.done_by in counts) {
+          counts[l.done_by]++
+          if (!lastAt[l.done_by]) lastAt[l.done_by] = l.done_at ?? l.logged_at
+        }
+      }
+
+      // Fewest turns first; break ties by who did it least recently
+      let best = flatmates[0]
+      for (const f of flatmates.slice(1)) {
+        if (counts[f.id] < counts[best.id]) {
+          best = f
+        } else if (counts[f.id] === counts[best.id]) {
+          const fa = lastAt[f.id], ba = lastAt[best.id]
+          if (!ba || (fa && fa < ba)) best = f
+        }
+      }
+      return best
+    },
+    enabled: !!choreId && !!isOnDemand,
+  })
+}
+
 export function useVacationPeriods(flatmateId) {
   return useQuery({
     queryKey: [QUERY_KEYS.VACATION_PERIODS, flatmateId],
